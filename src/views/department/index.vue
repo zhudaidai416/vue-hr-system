@@ -1,18 +1,93 @@
 <template>
   <div class="container">
     <div class="app-container">
-      组织架构
+      <el-tree :data="treeData" :props="defaultProps" default-expand-all :expand-on-click-node="false">
+        <template v-slot="{ data }">
+          <el-row type="flex" justify="space-between" align="middle">
+            <el-col>{{ data.name }}</el-col>
+            <el-col :span="4">
+              <span class="tree-manage">{{ data.managerName }}</span>
+              <!-- $event：实参，即 operate => operate($event) -->
+              <el-dropdown @command="operate($event, data.id)">
+                <span class="el-dropdown-link">
+                  操作<i class="el-icon-arrow-down el-icon--right" />
+                </span>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item command="add">添加子部门</el-dropdown-item>
+                  <el-dropdown-item command="edit">编辑部门</el-dropdown-item>
+                  <el-dropdown-item command="del">删除</el-dropdown-item>
+                </el-dropdown-menu>
+              </el-dropdown>
+            </el-col>
+          </el-row>
+        </template>
+      </el-tree>
     </div>
+    <!-- 弹窗组件 -->
+    <add-depart :show-dialog.sync="showDialog" :current-node-id="currentNodeId" @updateDepartment="getDepartmentList" />
   </div>
 </template>
 
 <script>
+import { transListToTree } from '@/utils'
+import { getDepartmentList } from '@/api/department'
+import AddDepart from './components/add-depart.vue'
+
 export default {
-  name: 'Department'
+  name: 'Department',
+  components: {
+    AddDepart
+  },
+  data() {
+    return {
+      treeData: [],
+      defaultProps: {
+        children: 'children',
+        label: 'name'
+      },
+      showDialog: false,
+      currentNodeId: null // 当前树形节点的id
+    }
+  },
+  created() {
+    this.getDepartmentList()
+  },
+  methods: {
+    async getDepartmentList() {
+      const res = await getDepartmentList()
+      this.treeData = transListToTree(res, 0)
+      console.log('🚀 ~ getDepartmentList ~ res:', transListToTree(res, 0))
+    },
+    operate(command, id) {
+      if (command === 'add') {
+        this.showDialog = true
+        this.currentNodeId = id
+      } else if (command === 'edit') {
+        console.log('edit')
+      } else {
+        console.log('del')
+      }
+    }
+  }
 
 }
 </script>
 
-<style lang="sass" scoped>
+<style lang="scss" scoped>
+.app-container {
+  padding: 30px 140px;
+  font-size: 14px;
 
+  .el-tree {
+    .el-row {
+      width: 100%;
+    }
+
+    .tree-manage {
+      width: 80px;
+      display: inline-block;
+      margin: 10px;
+    }
+  }
+}
 </style>
