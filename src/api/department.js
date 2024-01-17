@@ -25,3 +25,13 @@ export function addDepartment(data) {
 export function getDepartmentDetail(id) {
   return http.get(`/company/department/${id}`)
 }
+
+// 修改-部门详情
+export function updateDepartmentDetail(data) {
+  return http.put(`/company/department/${data.id}`, data)
+}
+
+// 删除-部门
+export function delDepartment(id) {
+  return http.delete(`/company/department/${id}`)
+}

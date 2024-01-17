@@ -1,5 +1,11 @@
 import http from '@/utils/request'
 
+/*
+*
+* 用户
+*
+*/
+
 // 登录
 export function login(data) {
   return http.post('/sys/login', data)

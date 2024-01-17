@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="新增部门" :visible="showDialog" @close="closeDialog">
+  <el-dialog :title="title" :visible="showDialog" @close="closeDialog">
     <el-form ref="form" label-width="120px" :model="formData" :rules="rules">
       <el-form-item label="部门名称" prop="name">
         <el-input v-model="formData.name" placeholder="2-10个字符" size="mini" />
@@ -28,7 +28,13 @@
 </template>
 
 <script>
-import { getDepartmentList, getManagerList, addDepartment } from '@/api/department'
+import {
+  getDepartmentList,
+  getManagerList,
+  addDepartment,
+  getDepartmentDetail,
+  updateDepartmentDetail
+} from '@/api/department'
 export default {
   props: {
     showDialog: {
@@ -56,7 +62,11 @@ export default {
           { min: 2, max: 10, message: '部门名称的长度为2-10个字符', trigger: 'blur' },
           {
             trigger: 'blur', validator: async(rule, value, callback) => {
-              const res = await getDepartmentList()
+              let res = await getDepartmentList()
+              if (this.formData.id) {
+                // 判断是否编辑，进入编辑过滤掉本身
+                res = res.filter(item => item.id !== this.formData.id)
+              }
               if (res.some(item => item.name === value)) {
                 callback(new Error('部门名称已存在'))
               } else {
@@ -70,7 +80,10 @@ export default {
           { min: 2, max: 10, message: '部门编码的长度为2-10个字符', trigger: 'blur' },
           {
             trigger: 'blur', validator: async(rule, value, callback) => {
-              const res = await getDepartmentList()
+              let res = await getDepartmentList()
+              if (this.formData.id) {
+                res = res.filter(item => item.id !== this.formData.id)
+              }
               if (res.some(item => item.code === value)) {
                 callback(new Error('部门编码已存在'))
               } else {
@@ -89,29 +102,52 @@ export default {
       }
     }
   },
+  computed: {
+    title() {
+      return this.formData.id ? '编辑部门' : '新增部门'
+    }
+  },
   created() {
     this.getManagerList()
   },
   methods: {
     closeDialog() {
-      // 重置表单
+      this.formData = {
+        name: '',
+        code: '',
+        managerId: '',
+        introduce: '',
+        pid: ''
+      }
+      // 重置表单：只能重置在模板中绑定的数据
       this.$refs.form.resetFields()
       // 修改父组件的值，子传父
       this.$emit('update:showDialog', false)
     },
+    // 获取部门负责人列表
     async getManagerList() {
       this.managerList = await getManagerList()
     },
     onSubmit() {
       this.$refs.form.validate(async(valid) => {
         if (valid) {
-          await addDepartment({ ...this.formData, pid: this.currentNodeId })
+          let msg = '新增'
+          if (this.formData.id) {
+            msg = '更新'
+            await updateDepartmentDetail(this.formData)
+          } else {
+            await addDepartment({ ...this.formData, pid: this.currentNodeId })
+          }
           // 通知父组件更新
           this.$emit('updateDepartment')
-          this.$message.success('新增部门成功')
+          this.$message.success(`${msg}部门成功！`)
           this.closeDialog()
         }
       })
+    },
+    // 获取组织详情
+    async getDepartmentDetail() {
+      this.formData = await getDepartmentDetail(this.currentNodeId)
     }
   }
 

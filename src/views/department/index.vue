@@ -24,13 +24,13 @@
       </el-tree>
     </div>
     <!-- 弹窗组件 -->
-    <add-depart :show-dialog.sync="showDialog" :current-node-id="currentNodeId" @updateDepartment="getDepartmentList" />
+    <add-depart ref="addDepart" :show-dialog.sync="showDialog" :current-node-id="currentNodeId" @updateDepartment="getDepartmentList" />
   </div>
 </template>
 
 <script>
 import { transListToTree } from '@/utils'
-import { getDepartmentList } from '@/api/department'
+import { getDepartmentList, delDepartment } from '@/api/department'
 import AddDepart from './components/add-depart.vue'
 
 export default {
@@ -56,16 +56,31 @@ export default {
     async getDepartmentList() {
       const res = await getDepartmentList()
       this.treeData = transListToTree(res, 0)
-      console.log('🚀 ~ getDepartmentList ~ res:', transListToTree(res, 0))
+      // console.log('🚀 ~ getDepartmentList ~ res:', transListToTree(res, 0))
     },
     operate(command, id) {
       if (command === 'add') {
         this.showDialog = true
         this.currentNodeId = id
       } else if (command === 'edit') {
-        console.log('edit')
+        this.showDialog = true
+        // 更新props - 异步
+        this.currentNodeId = id // 通过id获取数据
+
+        this.$nextTick(() => {
+          // 父组件调用子组件的方法来获取数据 - 同步
+          this.$refs.addDepart.getDepartmentDetail() // this.$refs.addDepart 等同于子组件的this
+        })
       } else {
-        console.log('del')
+        this.$confirm('是否删除该部门？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async() => {
+          await delDepartment(id)
+          this.$message.success('删除部门成功！')
+          this.getDepartmentList()
+        })
       }
     }
   }
@@ -74,6 +89,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.container {
+  padding: 20px;
+}
 .app-container {
   padding: 30px 140px;
   font-size: 14px;
