@@ -16,3 +16,12 @@ export function addRole(data) {
   return http.post('/sys/role', data)
 }
 
+// 修改-角色
+export function updateRole(data) {
+  return http.put(`/sys/role/${data.id}`, data)
+}
+
+// 删除-角色
+export function delRole(id) {
+  return http.delete(`/sys/role/${id}`)
+}

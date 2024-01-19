@@ -26,6 +26,11 @@ service.interceptors.request.use((config) => {
 service.interceptors.response.use((response) => {
   // 2xx 范围内的状态码都会触发该函数
   // 对响应数据做点什么
+
+  // 判断是否是Blob（导出excel时涉及到）
+  if (response.data instanceof Blob) return response.data
+
+  // 默认json格式
   const { data, message, success } = response.data
   if (success) {
     return data
