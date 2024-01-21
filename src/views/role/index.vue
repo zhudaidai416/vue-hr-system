@@ -165,7 +165,7 @@ export default {
     async onDelRole(id) {
       await delRole(id)
       this.$message.success('删除角色成功！')
-      if (this.tableData.length === 1) this.pageParams.page--
+      if (this.tableData.length === 1 && this.queryParams.page > 1) this.pageParams.page--
       this.getRoleList()
     }
   }

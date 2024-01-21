@@ -2,12 +2,18 @@
   <el-dialog width="500px" title="员工导入" :visible="showExcelDialog" @close="$emit('update:showExcelDialog', false)">
     <el-row type="flex" justify="center">
       <div class="upload-excel">
-        <input ref="excel-upload-input" class="excel-upload-input" type="file" accept=".xlsx, .xls">
+        <input
+          ref="excel-upload-input"
+          class="excel-upload-input"
+          type="file"
+          accept=".xlsx, .xls"
+          @change="uploadChange"
+        >
         <div class="drop">
           <i class="el-icon-upload" />
           <el-button type="text" @click="getImportExcelTemplate">下载导入模板</el-button>
           <span>将文件拖到此处或
-            <el-button type="text">点击上传</el-button>
+            <el-button type="text" @click="handleUpload">点击上传</el-button>
           </span>
         </div>
       </div>
@@ -19,7 +25,7 @@
   </el-dialog>
 </template>
 <script>
-import { getImportExcelTemplate } from '@/api/employee'
+import { getImportExcelTemplate, importExcelEmployee } from '@/api/employee'
 import FileSaver from 'file-saver'
 export default {
   props: {
@@ -32,8 +38,30 @@ export default {
     async getImportExcelTemplate() {
       const res = await getImportExcelTemplate()
       FileSaver.saveAs(res, '员工信息导入模板.xlsx')
+    },
+    // 弹出文件选择器 - 只有一种方式：input框的file类型
+    handleUpload() {
+      this.$refs['excel-upload-input'].click()
+    },
+    async uploadChange(event) {
+      // 考虑清空时的数据
+      const files = event.target.files // input的文件列表
+      if (files.length > 0) {
+        const data = new FormData()
+        data.append('file', files[0]) // 将文件参数加入到FormData中
+        try {
+          await importExcelEmployee(data)
+          this.$emit('uploadSuccess') // 通知父组件上传成功
+          this.$emit('update:showExcelDialog', false)
+          // this.$refs['excel-upload-input'].value = '' // 清空文件选择器
+        } catch (error) {
+          // 捕获失败
+          // this.$refs['excel-upload-input'].value = ''
+        } finally {
+          this.$refs['excel-upload-input'].value = ''
+        }
+      }
     }
-
   }
 }
 </script>

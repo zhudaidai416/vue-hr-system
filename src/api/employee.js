@@ -28,8 +28,13 @@ export function getImportExcelTemplate() {
 }
 
 // 批量-导入员工(上传excel)
-export function importExcelEmployee() {
-  return http.post('/sys/user/import')
+export function importExcelEmployee(data) {
+  return http.post('/sys/user/import', data)
+}
+
+// 删除-员工
+export function delEmployee(id) {
+  return http.delete(`/sys/user/${id}`)
 }
 
 // 新增-员工
@@ -37,12 +42,13 @@ export function addEmployee(data) {
   return http.post('/sys/user', data)
 }
 
-// 修改-员工-基本信息
-export function updateEmployee(data) {
-  return http.put(`/sys/user${data.id}`, data)
+// 获取-员工-基本信息
+export function getEmployeeDetail(id) {
+  return http.get(`/sys/user/${id}`)
 }
 
-// 删除-员工
-export function delEmployee(id) {
-  return http.delete(`/sys/user${id}`)
+// 修改-员工-基本信息
+export function updateEmployee(data) {
+  return http.put(`/sys/user/${data.id}`, data)
 }
+

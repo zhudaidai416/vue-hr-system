@@ -9,7 +9,7 @@
           prefix-icon="el-icon-search"
           size="small"
           placeholder="输入员工姓名全员搜索"
-          @input="search"
+          @input="onSearch"
         />
         <!-- 树形组件 -->
         <el-tree
@@ -25,7 +25,7 @@
       </div>
       <div class="right">
         <el-row class="opeate-tools" type="flex" justify="end">
-          <el-button size="mini" type="primary">添加员工</el-button>
+          <el-button size="mini" type="primary" @click="$router.push('/employee/detail')">添加员工</el-button>
           <el-button size="mini" @click="showExcelDialog = true">excel导入</el-button>
           <el-button size="mini" @click="exportEmployee">excel导出</el-button>
         </el-row>
@@ -49,10 +49,12 @@
           <el-table-column prop="departmentName" label="部门" />
           <el-table-column prop="timeOfEntry" align="center" label="入职时间" sortable />
           <el-table-column label="操作" width="200">
-            <template>
-              <el-button type="text" size="mini">查看</el-button>
+            <template v-slot="{ row }">
+              <el-button type="text" size="mini" @click="$router.push(`/employee/detail/${row.id}`)">查看</el-button>
               <el-button type="text" size="mini">角色</el-button>
-              <el-button type="text" size="mini">删除</el-button>
+              <el-popconfirm title="是否删除该员工信息？" @onConfirm="onDelEmployee(row.id)">
+                <el-button slot="reference" type="text" style="margin-left:10px" size="mini">删除</el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -68,7 +70,7 @@
         </el-row>
       </div>
     </div>
-    <import-excel :show-excel-dialog.sync="showExcelDialog" />
+    <import-excel :show-excel-dialog.sync="showExcelDialog" @uploadSuccess="getEmployeeList" />
   </div>
 </template>
 
@@ -76,7 +78,7 @@
 import ImportExcel from './components/import-excel.vue'
 import { transListToTree } from '@/utils'
 import { getDepartmentList } from '@/api/department'
-import { getEmployeeList, exportExcelEmployee } from '@/api/employee'
+import { getEmployeeList, exportExcelEmployee, delEmployee } from '@/api/employee'
 import FileSaver from 'file-saver'
 export default {
   name: 'Employee',
@@ -130,7 +132,7 @@ export default {
       this.queryParams.page = page
       this.getEmployeeList()
     },
-    search() {
+    onSearch() {
       // 防抖处理
       clearTimeout(this.timer)
       this.timer = setTimeout(() => {
@@ -143,6 +145,12 @@ export default {
       // 使用file-saver包：直接将blob文件下载到本地
       // FileSaver.saveAs(blob对象,文件名称)
       FileSaver.saveAs(res, '员工信息表.xlsx')
+    },
+    async onDelEmployee(id) {
+      await delEmployee(id)
+      this.$message.success('删除员工信息成功！')
+      if (this.tableData.length === 1 && this.queryParams.page > 1) this.queryParams.page--
+      this.getEmployeeList(this.queryParams)
     }
   }
 }
