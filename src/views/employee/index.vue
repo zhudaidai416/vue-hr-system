@@ -25,7 +25,7 @@
       </div>
       <div class="right">
         <el-row class="opeate-tools" type="flex" justify="end">
-          <el-button size="mini" type="primary" @click="$router.push('/employee/detail')">添加员工</el-button>
+          <el-button v-permission="'add-employee'" size="mini" type="primary" @click="$router.push('/employee/detail')">添加员工</el-button>
           <el-button size="mini" @click="showExcelDialog = true">excel导入</el-button>
           <el-button size="mini" @click="exportEmployee">excel导出</el-button>
         </el-row>
@@ -48,10 +48,10 @@
           </el-table-column>
           <el-table-column prop="departmentName" label="部门" />
           <el-table-column prop="timeOfEntry" align="center" label="入职时间" sortable />
-          <el-table-column label="操作" width="200">
+          <el-table-column label="操作" width="160">
             <template v-slot="{ row }">
               <el-button type="text" size="mini" @click="$router.push(`/employee/detail/${row.id}`)">查看</el-button>
-              <el-button type="text" size="mini">角色</el-button>
+              <el-button type="text" size="mini" @click="onRole(row.id)">角色</el-button>
               <el-popconfirm title="是否删除该员工信息？" @onConfirm="onDelEmployee(row.id)">
                 <el-button slot="reference" type="text" style="margin-left:10px" size="mini">删除</el-button>
               </el-popconfirm>
@@ -71,11 +71,13 @@
       </div>
     </div>
     <import-excel :show-excel-dialog.sync="showExcelDialog" @uploadSuccess="getEmployeeList" />
+    <assign-role :show-role-dialog.sync="showRoleDialog" :employee-id="employeeId" />
   </div>
 </template>
 
 <script>
 import ImportExcel from './components/import-excel.vue'
+import AssignRole from './components/assign-role.vue'
 import { transListToTree } from '@/utils'
 import { getDepartmentList } from '@/api/department'
 import { getEmployeeList, exportExcelEmployee, delEmployee } from '@/api/employee'
@@ -83,7 +85,8 @@ import FileSaver from 'file-saver'
 export default {
   name: 'Employee',
   components: {
-    ImportExcel
+    ImportExcel,
+    AssignRole
   },
   data() {
     return {
@@ -101,7 +104,9 @@ export default {
       },
       tableData: [],
       total: 0,
-      showExcelDialog: false
+      showExcelDialog: false,
+      showRoleDialog: false,
+      employeeId: null
     }
   },
   created() {
@@ -151,6 +156,10 @@ export default {
       this.$message.success('删除员工信息成功！')
       if (this.tableData.length === 1 && this.queryParams.page > 1) this.queryParams.page--
       this.getEmployeeList(this.queryParams)
+    },
+    onRole(id) {
+      this.employeeId = id
+      this.showRoleDialog = true
     }
   }
 }

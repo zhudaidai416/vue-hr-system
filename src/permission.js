@@ -2,6 +2,7 @@ import router from '@/router'
 import NProgress from 'nprogress' // 进度条
 import 'nprogress/nprogress.css'
 import store from '@/store'
+import { asyncRoutes } from '@/router'
 
 // 白名单：不需要登录就可以访问
 const whiteList = ['/login', '/404']
@@ -17,9 +18,22 @@ router.beforeEach(async(to, from, next) => {
     } else {
       // 判断是否获取用户资料
       if (!store.getters.userId) {
-        await store.dispatch('user/getUserInfo')
+        const { roles } = await store.dispatch('user/getUserInfo')
+
+        // 路由筛选
+        const filterRoutes = asyncRoutes.filter(item => roles.menus.includes(item.name))
+        // console.log('🚀 ~ router.beforeEach ~ filterRoutes:', filterRoutes)
+
+        store.commit('user/setRoutes', filterRoutes)
+
+        // 添加动态路由信息到路由表
+        // 404必须放在所有路由的最后
+        router.addRoutes([...filterRoutes, { path: '*', redirect: '/404', hidden: true }])
+        // 需要转发，目的是让路由拥有信息，router的已知缺陷
+        next(to.path)
+      } else {
+        next() // 放过
       }
-      next()
     }
   } else {
     if (whiteList.includes(to.path)) { // 写法2：whiteList.indexOf(to.path) > -1

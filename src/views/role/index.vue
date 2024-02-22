@@ -35,8 +35,8 @@
               <el-button size="mini" @click="row.isEdit = false">取消</el-button>
             </template>
             <template v-else>
-              <el-button type="text">分配权限</el-button>
-              <el-button type="text" @click="onEditRow(row)">编辑</el-button>
+              <el-button type="text" @click="onAssignRole(row.id)">分配权限</el-button>
+              <el-button type="text" @click="onEditRole(row)">编辑</el-button>
               <el-popconfirm title="是否删除该角色？" @onConfirm="onDelRole(row.id)">
                 <el-button slot="reference" style="margin-left:10px" type="text">删除</el-button>
               </el-popconfirm>
@@ -76,12 +76,17 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+    <assign-permission ref="AssignPermission" :show-assign-dialog.sync="showAssignDialog" />
   </div>
 </template>
 <script>
+import AssignPermission from './components/assign-permission.vue'
 import { getRoleList, addRole, updateRole, delRole } from '@/api/role'
 export default {
   name: 'Role',
+  components: {
+    AssignPermission
+  },
   data() {
     return {
       showDialog: false,
@@ -100,7 +105,8 @@ export default {
         page: 1,
         pagesize: 5,
         total: 0
-      }
+      },
+      showAssignDialog: false
     }
   },
   created() {
@@ -143,7 +149,7 @@ export default {
       this.$refs.roleForm.resetFields()
       this.showDialog = false
     },
-    onEditRow(row) {
+    onEditRole(row) {
       row.isEdit = true
       row.editRow.name = row.name
       row.editRow.state = row.state
@@ -167,6 +173,10 @@ export default {
       this.$message.success('删除角色成功！')
       if (this.tableData.length === 1 && this.queryParams.page > 1) this.pageParams.page--
       this.getRoleList()
+    },
+    async onAssignRole(id) {
+      await this.$refs.AssignPermission.getPermissionList(id)
+      this.showAssignDialog = true
     }
   }
 }

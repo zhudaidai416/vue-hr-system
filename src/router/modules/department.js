@@ -2,6 +2,7 @@ import Layout from '@/layout/index'
 
 export default {
   path: '/department',
+  name: 'department',
   component: Layout, // 一级路由
   children: [
     {

@@ -1,9 +1,11 @@
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { login, getUserInfo } from '@/api/user'
+import { constantRoutes, resetRouter } from '@/router'
 
 const state = {
   token: getToken(), // 从缓存中读取初始值
-  userInfo: {}
+  userInfo: {}, // 用户资料
+  routes: constantRoutes // 初始值为静态路由
 }
 
 const mutations = {
@@ -19,8 +21,10 @@ const mutations = {
   },
   setUserInfo(state, userInfo) {
     state.userInfo = userInfo
+  },
+  setRoutes(state, newRoutes) {
+    state.routes = [...constantRoutes, ...newRoutes] // 静态路由+动态路由
   }
-
 }
 
 const actions = {
@@ -31,10 +35,13 @@ const actions = {
   async getUserInfo(context) {
     const res = await getUserInfo()
     context.commit('setUserInfo', res)
+    return res // 返回数据
   },
   logout(context) {
     context.commit('removeToken')
     context.commit('setUserInfo', {})
+    // 重置路由
+    resetRouter()
   }
 }
 

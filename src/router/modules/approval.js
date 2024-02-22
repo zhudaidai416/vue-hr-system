@@ -2,6 +2,7 @@ import Layout from '@/layout/index'
 
 export default {
   path: '/approval',
+  name: 'approval',
   component: Layout,
   children: [
     {

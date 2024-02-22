@@ -25,3 +25,18 @@ export function updateRole(data) {
 export function delRole(id) {
   return http.delete(`/sys/role/${id}`)
 }
+
+// 获取-已启用的角色列表
+export function getEnabledRoleList() {
+  return http.get('/sys/role/list/enabled')
+}
+
+// 获取-角色详情
+export function getRoleDetail(id) {
+  return http.get(`/sys/role/${id}`)
+}
+
+// 分配权限-角色
+export function assignPermission(data) {
+  return http.put('/sys/role/assignPrem', data)
+}

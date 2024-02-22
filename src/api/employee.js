@@ -52,3 +52,7 @@ export function updateEmployee(data) {
   return http.put(`/sys/user/${data.id}`, data)
 }
 
+// 分配-员工-角色
+export function assignRole(data) {
+  return http.put('/sys/user/assignRoles', data)
+}
