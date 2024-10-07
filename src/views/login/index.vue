@@ -10,10 +10,16 @@
             <el-input v-model="loginForm.mobile" placeholder="请输入手机号" />
           </el-form-item>
           <el-form-item prop="password">
-            <el-input v-model="loginForm.password" show-password placeholder="请输入密码" />
+            <el-input
+              v-model="loginForm.password"
+              show-password
+              placeholder="请输入密码"
+            />
           </el-form-item>
           <el-form-item prop="isAgree">
-            <el-checkbox v-model="loginForm.isAgree">用户平台使用协议</el-checkbox>
+            <el-checkbox v-model="loginForm.isAgree"
+              >用户平台使用协议</el-checkbox
+            >
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="login">登录</el-button>
@@ -26,46 +32,52 @@
 
 <script>
 export default {
-  name: 'Login',
+  name: "Login",
   data() {
     return {
       loginForm: {
-        mobile: process.env.NODE_ENV === 'development' ? '13800000002' : '',
-        password: process.env.NODE_ENV === 'development' ? 'hm#qd@23!' : '',
-        isAgree: process.env.NODE_ENV === 'development'
+        mobile: process.env.NODE_ENV === "development" ? "13800000002" : "",
+        password: process.env.NODE_ENV === "development" ? "hm#qd@23!" : "",
+        isAgree: process.env.NODE_ENV === "development",
       },
       loginRules: {
         mobile: [
-          { required: true, message: '请输入手机号', trigger: 'blur' },
-          { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }
+          { required: true, message: "请输入手机号", trigger: "blur" },
+          {
+            pattern: /^1[3-9]\d{9}$/,
+            message: "手机号格式不正确",
+            trigger: "blur",
+          },
         ],
         password: [
-          { required: true, message: '请输入密码', trigger: 'blur' },
-          { min: 6, max: 16, message: '密码长度在6-16位之间', trigger: 'blur' }
+          { required: true, message: "请输入密码", trigger: "blur" },
+          { min: 6, max: 16, message: "密码长度在6-16位之间", trigger: "blur" },
         ],
         isAgree: [
           {
             validator: (rule, value, callback) => {
-              value ? callback() : callback(new Error('您必须勾选用户使用协议'))
-            }
-          }
-        ]
-      }
-    }
+              value
+                ? callback()
+                : callback(new Error("您必须勾选用户使用协议"));
+            },
+          },
+        ],
+      },
+    };
   },
   methods: {
     login() {
-      this.$refs.form.validate(async(value) => {
+      this.$refs.form.validate(async (value) => {
         if (value) {
-          await this.$store.dispatch('user/login', this.loginForm)
+          await this.$store.dispatch("user/login", this.loginForm);
           // 跳转主页
-          this.$router.push('/')
-          this.$message.success('登录成功！')
+          this.$router.push("/");
+          this.$message.success("登录成功！");
         }
-      })
-    }
-  }
-}
+      });
+    },
+  },
+};
 </script>
 <style lang="scss" scoped>
 .login-container {
@@ -75,7 +87,8 @@ export default {
 
   .logo {
     flex: 3;
-    background: rgba(38, 72, 176) url(../../assets/common/login_back.png) no-repeat center / cover;
+    background: rgba(38, 72, 176) url(../../assets/common/login_back.png)
+      no-repeat center / cover;
     border-top-right-radius: 60px;
     display: flex;
     flex-direction: column;
@@ -84,7 +97,6 @@ export default {
     padding: 0 100px;
 
     .icon {
-      background: url(../../assets/common/logo.png) no-repeat 70px center / contain;
       width: 300px;
       height: 50px;
       margin-bottom: 50px;

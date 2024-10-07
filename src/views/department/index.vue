@@ -1,7 +1,12 @@
 <template>
   <div class="container">
     <div class="app-container">
-      <el-tree :data="treeData" :props="defaultProps" default-expand-all :expand-on-click-node="false">
+      <el-tree
+        :data="treeData"
+        :props="defaultProps"
+        default-expand-all
+        :expand-on-click-node="false"
+      >
         <template v-slot="{ data }">
           <el-row type="flex" justify="space-between" align="middle">
             <el-col>{{ data.name }}</el-col>
@@ -24,68 +29,73 @@
       </el-tree>
     </div>
     <!-- 弹窗组件 -->
-    <add-depart ref="addDepart" :show-dialog.sync="showDialog" :current-node-id="currentNodeId" @updateDepartment="getDepartmentList" />
+    <add-depart
+      ref="addDepart"
+      :show-dialog.sync="showDialog"
+      :current-node-id="currentNodeId"
+      @updateDepartment="getDepartmentList"
+    />
   </div>
 </template>
 
 <script>
-import { transListToTree } from '@/utils'
-import { getDepartmentList, delDepartment } from '@/api/department'
-import AddDepart from './components/add-depart.vue'
+import { transListToTree } from "@/utils";
+import { getDepartmentList, delDepartment } from "@/api/department";
+import AddDepart from "./components/add-depart.vue";
 
 export default {
-  name: 'Department',
+  name: "Department",
   components: {
-    AddDepart
+    AddDepart,
   },
   data() {
     return {
       treeData: [],
       defaultProps: {
-        children: 'children',
-        label: 'name'
+        children: "children",
+        label: "name",
       },
       showDialog: false,
-      currentNodeId: null // 当前树形节点的id
-    }
+      currentNodeId: null, // 当前树形节点的id
+    };
   },
   created() {
-    this.getDepartmentList()
+    this.getDepartmentList();
   },
   methods: {
     async getDepartmentList() {
-      const res = await getDepartmentList()
-      this.treeData = transListToTree(res, 0)
+      const res = await getDepartmentList();
+      console.log(res);
+      this.treeData = transListToTree(res, 0);
       // console.log('🚀 ~ getDepartmentList ~ res:', transListToTree(res, 0))
     },
     operate(command, id) {
-      if (command === 'add') {
-        this.showDialog = true
-        this.currentNodeId = id
-      } else if (command === 'edit') {
-        this.showDialog = true
+      if (command === "add") {
+        this.showDialog = true;
+        this.currentNodeId = id;
+      } else if (command === "edit") {
+        this.showDialog = true;
         // 更新props - 异步
-        this.currentNodeId = id // 通过id获取数据
+        this.currentNodeId = id; // 通过id获取数据
 
         this.$nextTick(() => {
           // 父组件调用子组件的方法来获取数据 - 同步
-          this.$refs.addDepart.getDepartmentDetail() // this.$refs.addDepart 等同于子组件的this
-        })
+          this.$refs.addDepart.getDepartmentDetail(); // this.$refs.addDepart 等同于子组件的this
+        });
       } else {
-        this.$confirm('是否删除该部门？', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(async() => {
-          await delDepartment(id)
-          this.$message.success('删除部门成功！')
-          this.getDepartmentList()
-        })
+        this.$confirm("是否删除该部门？", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }).then(async () => {
+          await delDepartment(id);
+          this.$message.success("删除部门成功！");
+          this.getDepartmentList();
+        });
       }
-    }
-  }
-
-}
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
